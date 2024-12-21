@@ -9,6 +9,7 @@
 <body>
     <div class="main-dashboard">
         <header>
+            <img src="images/logo.png" alt="Borb Coin Logo" class="logo">
             <h1>Borb Coin Dashboard</h1>
         </header>
         <div class="stats">
@@ -16,10 +17,10 @@
                 <p>Current Level: <span id="current-level">LVL 4/10</span></p>
             </div>
             <div class="stat-card">
-                <p>Diamond Balance: <span id="diamond-balance">115 💎</span></p>
+                <p>Coin Balance: <span id="coin-balance">100,390 🐥</span></p>
             </div>
             <div class="stat-card">
-                <p>Coin Balance: <span id="coin-balance">100,390 💰</span></p>
+                <p>BORB Balance: <span id="borb-balance">115 🪙</span></p>
             </div>
             <div class="stat-card">
                 <p>Earning Rate: <span id="earning-rate">200/hour</span></p>
@@ -30,17 +31,36 @@
         </div>
         <div class="tasks">
             <h2>Daily Tasks</h2>
-            <button class="task-button" id="check-in-button">Check-In (+100 💎)</button>
+            <button class="task-button" id="check-in-button">Check-In (+100 🪙)</button>
             <p>7-day streak rewards</p>
-            <p>Weekly completion bonus: +1000 💎</p>
+            <p>Weekly completion bonus: +1000 🪙</p>
         </div>
         <div class="social-tasks">
             <h2>Social Tasks</h2>
-            <button class="task-button" id="join-telegram-button">Join Telegram (+500 💎)</button>
-            <button class="task-button" id="join-premium-telegram-button">Join Premium Telegram (+1000 💎)</button>
-            <button class="task-button" id="follow-facebook-button">Follow on Facebook (+300 💎)</button>
-            <button class="task-button" id="follow-twitter-button">Follow on Twitter (+300 💎)</button>
-            <button class="task-button" id="follow-instagram-button">Follow on Instagram (+300 💎)</button>
+            <button class="task-button" id="join-telegram-button">Join Telegram (+500 🪙)</button>
+            <button class="task-button" id="join-premium-telegram-button">Join Premium Telegram (+1000 🪙)</button>
+            <button class="task-button" id="follow-facebook-button">Follow on Facebook (+300 🪙)</button>
+            <button class="task-button" id="follow-twitter-button">Follow on Twitter (+300 🪙)</button>
+            <button class="task-button" id="follow-instagram-button">Follow on Instagram (+300 🪙)</button>
+        </div>
+        <div class="store">
+            <h2>Buy Coin</h2>
+            <div class="coin-package" data-price="0.99" data-coins="1000">
+                <p>1,000 coins - $0.99</p>
+                <button class="buy-button">Buy</button>
+            </div>
+            <div class="coin-package" data-price="4.99" data-coins="5000">
+                <p>5,000 coins - $4.99</p>
+                <button class="buy-button">Buy</button>
+            </div>
+            <div class="coin-package" data-price="9.99" data-coins="12000">
+                <p>12,000 coins (+1,000 bonus) - $9.99</p>
+                <button class="buy-button">Buy</button>
+            </div>
+            <div class="coin-package" data-price="19.99" data-coins="25000">
+                <p>25,000 coins (+3,000 bonus) - $19.99</p>
+                <button class="buy-button">Buy</button>
+            </div>
         </div>
         <nav class="bottom-nav">
             <button>Earn</button>
@@ -51,4 +71,4 @@
     </div>
     <script src="script.js"></script>
 </body>
-    </html>
+</html>
