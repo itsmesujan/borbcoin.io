@@ -10,6 +10,15 @@ header {
     background-color: #2196f3;
     padding: 20px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 10px;
 }
 
 .main-dashboard {
@@ -32,11 +41,11 @@ header {
     text-align: center;
 }
 
-.tasks, .social-tasks {
+.tasks, .social-tasks, .store {
     margin: 20px 0;
 }
 
-.task-button {
+.task-button, .buy-button {
     background-color: #4caf50;
     border: none;
     border-radius: 5px;
@@ -45,6 +54,18 @@ header {
     margin: 10px 0;
     padding: 10px 20px;
     width: 100%;
+}
+
+.store h2 {
+    margin-bottom: 10px;
+}
+
+.coin-package {
+    background-color: #242942;
+    border-radius: 10px;
+    margin: 10px 0;
+    padding: 20px;
+    text-align: center;
 }
 
 .bottom-nav {
