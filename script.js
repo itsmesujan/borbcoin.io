@@ -1,72 +1,142 @@
-// Telegram Web App SDK Initialization
+// script.js (Partial)
 const telegram = window.Telegram.WebApp;
-telegram.ready(); // Signal that the app is ready
+telegram.ready();
 
-// Game Variables
-let score = 0;
-let earnings = 0.00;
-const tapValue = 0.01; // Earning per tap
+let userId; // Telegram User ID
+let coinBalance = 0; // In Nexol Coins
+let referralCode;
 
 // DOM Elements
+const coinBalanceDisplay = document.getElementById('coinBalance');
 const tapArea = document.getElementById('tapArea');
-const scoreDisplay = document.getElementById('score');
-const earningsDisplay = document.getElementById('earnings');
-const sendDataButton = document.getElementById('sendDataButton');
+const referralLinkInput = document.getElementById('referralLink');
+const copyReferralButton = document.getElementById('copyReferral');
+const eventListDiv = document.getElementById('eventList');
+const withdrawButton = document.getElementById('withdrawButton');
 
-// Tap Event Listener
-tapArea.addEventListener('click', () => {
-    score++;
-    earnings += tapValue;
-    scoreDisplay.textContent = `Score: ${score}`;
-    earningsDisplay.textContent = `Earnings: ${earnings.toFixed(2)}`;
-});
+// API Endpoint (Replace with your actual backend URL)
+const API_BASE_URL = 'YOUR_BACKEND_URL';
 
-// Send Data to Telegram (Example)
-sendDataButton.addEventListener('click', () => {
-    const data = {
-        score: score,
-        earnings: earnings
-    };
+// Get User Data (on app launch)
+async function loadUserData() {
+    userId = telegram.initDataUnsafe.user.id; // Get Telegram User ID (Important!)
+    referralCode = generateReferralCode(userId);
+    referralLinkInput.value = `${window.location.href}?ref=${referralCode}`; // Assuming a simple query parameter
 
-    telegram.sendData(JSON.stringify(data));
-    alert("Data sent to Telegram!"); // For demonstration
-});
+    try {
+        const response = await fetch(`${API_BASE_URL}/user/${userId}`);
+        const data = await response.json();
+        coinBalance = data.coinBalance || 0; // Initialize if user doesn't exist
+    } catch (error) {
+        console.error("Error loading user data:", error);
+    }
 
-//Set Telegram theme
-document.documentElement.style.setProperty('--tg-theme-bg-color', telegram.themeParams.bg_color);
-document.documentElement.style.setProperty('--tg-theme-text-color', telegram.themeParams.text_color);
-document.documentElement.style.setProperty('--tg-theme-hint-color', telegram.themeParams.hint_color);
-document.documentElement.style.setProperty('--tg-theme-link-color', telegram.themeParams.link_color);
-document.documentElement.style.setProperty('--tg-theme-button-color', telegram.themeParams.button_color);
-document.documentElement.style.setProperty('--tg-theme-button-text-color', telegram.themeParams.button_text_color);
-function updateUI() {
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    document.getElementById('current-level').textContent = `LVL ${userData.currentLevel}/10`;
-    document.getElementById('borb-balance').textContent = `${userData.borbBalance} 🪙`;
-    document.getElementById('coin-balance').textContent = `${userData.coinBalance} 🐥`;
-    document.getElementById('earning-rate').textContent = `${userData.earningRate}/hour`;
-    document.getElementById('active-multiplier').textContent = userData.activeMultiplier;
+    coinBalanceDisplay.textContent = `Balance: ${coinBalance} Nexol Coins`;
+    loadEvents(); // Load events after user data
 }
 
-function completeTask(currency, amount) {
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    userData[`${currency}Balance`] += amount;
-    localStorage.setItem('userData', JSON.stringify(userData));
-    updateUI();
-    alert(`Task Completed! You earned ${amount} ${currency === 'borb' ? '🪙' : '🐥'}`);
+// Tap to Earn
+tapArea.addEventListener('click', async () => {
+    coinBalance++; // Simulate earning Nexol Coins
+    coinBalanceDisplay.textContent = `Balance: ${coinBalance} Nexol Coins`;
+
+    // Send updated balance to the backend
+    try {
+        await fetch(`${API_BASE_URL}/user/${userId}`, {
+            method: 'PUT', // Or PATCH
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ coinBalance: coinBalance })
+        });
+    } catch (error) {
+        console.error("Error updating Nexol Coin balance:", error);
+    }
+});
+
+// Generate Referral Code
+function generateReferralCode(userId) {
+    // A simple example (you might want a more robust method)
+    return btoa(userId); // Base64 encode the user ID
 }
 
-function handleBuyClick(event) {
-    const coinPackage = event.target.closest('.coin-package');
-    const price = parseFloat(coinPackage.getAttribute('data-price'));
-    const coins = parseInt(coinPackage.getAttribute('data-coins'));
+// Load Events from the backend
+async function loadEvents() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/events`);
+        const events = await response.json();
 
-    // Handle the purchase logic
-    if (confirm(`Do you want to buy ${coins} coins for $${price}?`)) {
-        const userData = JSON.parse(localStorage.getItem('userData'));
-        userData.coinBalance += coins;
-        localStorage.setItem('userData', JSON.stringify(userData));
-        updateUI();
-        alert(`Purchase Successful! You bought ${coins} coins 🐥`);
+        eventListDiv.innerHTML = ''; // Clear existing events
+        events.forEach(event => {
+            const eventDiv = document.createElement('div');
+            eventDiv.innerHTML = `
+                <h3>${event.name}</h3>
+                <p>${event.description}</p>
+                <button class="completeEvent" data-event-id="${event.id}">Complete Event</button>
+            `;
+            eventListDiv.appendChild(eventDiv);
+        });
+
+         // Event completion logic
+         document.querySelectorAll('.completeEvent').forEach(button => {
+            button.addEventListener('click', async (event) => {
+                const eventId = event.target.dataset.eventId;
+
+                try {
+                    //Simulate user completing the event
+                    coinBalance += 10; // Reward is also in Nexol Coins.
+                    coinBalanceDisplay.textContent = `Balance: ${coinBalance} Nexol Coins`;
+
+                    // Send updated balance to the backend
+                    await fetch(`${API_BASE_URL}/user/${userId}`, {
+                        method: 'PUT', // Or PATCH
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ coinBalance: coinBalance })
+                    });
+
+                    // Send event completion notification to backend
+                    await fetch(`${API_BASE_URL}/eventComplete`, {
+                        method: 'POST', // Or PATCH
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userID: userId, eventID: eventId })
+                    });
+                } catch (error) {
+                    console.error("Error completing event:", error);
+                }
+            });
+        });
+
+    } catch (error) {
+        console.error("Error loading events:", error);
     }
 }
+
+copyReferralButton.addEventListener('click', () => {
+    referralLinkInput.select();
+    document.execCommand('copy');
+    alert('Referral link copied!');
+});
+
+withdrawButton.addEventListener('click', async () => {
+    const walletAddress = prompt("Enter your wallet address to withdraw Nexol Coins:");
+    if (walletAddress) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/withdraw`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: userId, address: walletAddress, amount: coinBalance })
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert("Withdrawal request for Nexol Coins submitted successfully!");
+            } else {
+                alert("Withdrawal failed: " + data.message);
+            }
+        } catch (error) {
+            console.error("Error during withdrawal:", error);
+            alert("Withdrawal failed. Please try again later.");
+        }
+    } else {
+        alert("Wallet address is required to withdraw Nexol Coins.");
+    }
+});
+
+loadUserData();
