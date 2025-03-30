@@ -1,35 +1,69 @@
-body {
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f0f0f0;
-}
+// server.js (Example using Express.js)
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { v4: uuidv4 } = require('uuid');
+const app = express();
+const port = 3000;
 
-.container {
-    text-align: center;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+app.use(cors());
+app.use(bodyParser.json());
 
-.tap-area {
-    background-color: #007bff;
-    color: white;
-    padding: 20px;
-    margin: 20px auto;
-    width: 200px;
-    border-radius: 8px;
-    cursor: pointer;
-    user-select: none; /* Prevent text selection on tap */
-}
+// In-memory database (Replace with a real database)
+const users = {}; // { userId: { coinBalance: 0, referralCode: '...', referredBy: '...' } }
+const events = [
+    { id: uuidv4(), name: 'First Tap!', description: 'Tap the tap area once.' },
+    { id: uuidv4(), name: 'Invite a Friend', description: 'Invite one friend to the game.' }
+];
+const eventComplete = [];// List of all completed event by users [ {userID, eventID}, ... ]
 
-.tap-area:hover {
-    background-color: #0056b3;
-}
+// API Endpoints
 
-#score, #earnings {
-    margin-top: 10px;
+// Get User Data
+app.get('/user/:userId', (req, res) => {
+    const userId = req.params.userId;
+    if (!users[userId]) {
+        users[userId] = { coinBalance: 0, referralCode: generateReferralCode(userId), referredBy: null };
+    }
+    res.json(users[userId]);
+});
+
+// Update User Data (Coin Balance - Nexol Coins)
+app.put('/user/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const { coinBalance } = req.body;
+
+    if (users[userId]) {
+        users[userId].coinBalance = coinBalance;
+        res.json({ message: 'Nexol Coin balance updated successfully' });
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
+});
+
+// Get Events
+app.get('/events', (req, res) => {
+    res.json(events);
+});
+
+//Get event complete
+app.post('/eventComplete', (req, res) => {
+    const { userID, eventID } = req.body;
+    if (userID && eventID) {
+        eventComplete.push({ userID: userID, eventID: eventID });
+        res.status(200).json({ message: 'Event Completed by user successfully' });
+    } else {
+        res.status(404).json({ message: 'Event can not be completed' });
+    }
+});
+
+//Referral System
+
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+});
+
+function generateReferralCode(userId) {
+    // A simple example (you might want a more robust method)
+    return btoa(userId); // Base64 encode the user ID
 }
