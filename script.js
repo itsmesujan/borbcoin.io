@@ -1,38 +1,44 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize user data
-    initializeUserData();
+// Telegram Web App SDK Initialization
+const telegram = window.Telegram.WebApp;
+telegram.ready(); // Signal that the app is ready
 
-    // Update UI with user data
-    updateUI();
+// Game Variables
+let score = 0;
+let earnings = 0.00;
+const tapValue = 0.01; // Earning per tap
 
-    // Add event listeners for task buttons
-    document.getElementById('check-in-button').addEventListener('click', () => completeTask('borb', 100));
-    document.getElementById('join-telegram-button').addEventListener('click', () => completeTask('borb', 500));
-    document.getElementById('join-premium-telegram-button').addEventListener('click', () => completeTask('borb', 1000));
-    document.getElementById('follow-facebook-button').addEventListener('click', () => completeTask('borb', 300));
-    document.getElementById('follow-twitter-button').addEventListener('click', () => completeTask('borb', 300));
-    document.getElementById('follow-instagram-button').addEventListener('click', () => completeTask('borb', 300));
+// DOM Elements
+const tapArea = document.getElementById('tapArea');
+const scoreDisplay = document.getElementById('score');
+const earningsDisplay = document.getElementById('earnings');
+const sendDataButton = document.getElementById('sendDataButton');
 
-    // Add event listeners for buy buttons
-    const buyButtons = document.querySelectorAll('.buy-button');
-    buyButtons.forEach(button => {
-        button.addEventListener('click', handleBuyClick);
-    });
+// Tap Event Listener
+tapArea.addEventListener('click', () => {
+    score++;
+    earnings += tapValue;
+    scoreDisplay.textContent = `Score: ${score}`;
+    earningsDisplay.textContent = `Earnings: ${earnings.toFixed(2)}`;
 });
 
-function initializeUserData() {
-    if (!localStorage.getItem('userData')) {
-        const initialData = {
-            currentLevel: 4,
-            borbBalance: 115,
-            coinBalance: 100390,
-            earningRate: 200,
-            activeMultiplier: '2x'
-        };
-        localStorage.setItem('userData', JSON.stringify(initialData));
-    }
-}
+// Send Data to Telegram (Example)
+sendDataButton.addEventListener('click', () => {
+    const data = {
+        score: score,
+        earnings: earnings
+    };
 
+    telegram.sendData(JSON.stringify(data));
+    alert("Data sent to Telegram!"); // For demonstration
+});
+
+//Set Telegram theme
+document.documentElement.style.setProperty('--tg-theme-bg-color', telegram.themeParams.bg_color);
+document.documentElement.style.setProperty('--tg-theme-text-color', telegram.themeParams.text_color);
+document.documentElement.style.setProperty('--tg-theme-hint-color', telegram.themeParams.hint_color);
+document.documentElement.style.setProperty('--tg-theme-link-color', telegram.themeParams.link_color);
+document.documentElement.style.setProperty('--tg-theme-button-color', telegram.themeParams.button_color);
+document.documentElement.style.setProperty('--tg-theme-button-text-color', telegram.themeParams.button_text_color);
 function updateUI() {
     const userData = JSON.parse(localStorage.getItem('userData'));
     document.getElementById('current-level').textContent = `LVL ${userData.currentLevel}/10`;
